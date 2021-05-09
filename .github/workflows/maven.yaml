@@ -58,8 +58,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cat ~/.ssh/id_rsa
-            echo "hello world"
-            cd $HOME
+            echo ${CONTAINER_NAME}
             ./hello.sh
-            sudo docker run -dit --name alamisharia -p 8888:8888 rizkyramadhanch/alamisharia-helloproject
+            sudo docker inspect --format='{{.Config.Image}}' ${CONTAINER_NAME} > /tmp/imagename
+            cat /tmp/imagename
+            sudo docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${PUBLISHED_PORT_BAK}:${INTERNAL_PORT} $(cat /tmp/imagename)
+            sleep 10
+            sudo docker ps
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT_BAK}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}; else docker rm -f ${CONTAINER_NAME}-0; exit 1; fi
+            sudo docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} ${REPO}:${GH_SHA}
+            sleep 10
+            sudo docker ps
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}-0; else docker rm -f docker rm ${CONTAINER_NAME} && docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} $(cat /tmp/imagename) && docker rm ${CONTAINER_NAME}-0 -f; exit 1; fi
