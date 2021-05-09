@@ -46,6 +46,7 @@ jobs:
     needs: [docker]
     env:
       CONTAINER_NAME: sandbox-alami
+      REPO: ${{ secrets.DOCKER_REPO }}
       INTERNAL_PORT: 8888
       PUBLISHED_PORT: 8888
       PUBLISHED_PORT_BAK: 8888
@@ -59,13 +60,13 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo ${CONTAINER_NAME}
-            sudo docker inspect --format='{{.Config.Image}}' ${CONTAINER_NAME} > /tmp/imagename
+            sudo docker inspect --format='{{.Config.Image}}' ${{ env.CONTAINER_NAME }} > /tmp/imagename
             cat /tmp/imagename
-            sudo docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${PUBLISHED_PORT_BAK}:${INTERNAL_PORT} $(cat /tmp/imagename)
+            sudo docker run --restart always --name ${{ env.CONTAINER_NAME }}-0 -dit -p ${{ env.PUBLISHED_PORT_BAK }}:${{ env.INTERNAL_PORT }} $(cat /tmp/imagename)
             sleep 10
             sudo docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT_BAK}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}; else docker rm -f ${CONTAINER_NAME}-0; exit 1; fi
-            sudo docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} ${REPO}:${GH_SHA}
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${{ env.PUBLISHED_PORT_BAK }}) -eq 200 ]; then docker rm -f ${{env.CONTAINER_NAME }}; else docker rm -f ${{ env.CONTAINER_NAME }}-0; exit 1; fi
+            sudo docker run --restart always --name ${{ env.CONTAINER_NAME }} -dit -p ${{ env.PUBLISHED_PORT }}:${{ env.INTERNAL_PORT }} ${{ env.REPO }}:${GH_SHA}
             sleep 10
             sudo docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}-0; else docker rm -f docker rm ${CONTAINER_NAME} && docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} $(cat /tmp/imagename) && docker rm ${CONTAINER_NAME}-0 -f; exit 1; fi
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${{ env.PUBLISHED_PORT }}) -eq 200 ]; then docker rm -f ${{ env.CONTAINER_NAME }}-0; else docker rm -f docker rm ${{ env.CONTAINER_NAME }} && docker run --restart always --name ${{ env.CONTAINER_NAME }} -dit -p ${{ env.PUBLISHED_PORT }}:${{ env.INTERNAL_PORT }} $(cat /tmp/imagename) && docker rm ${{ env.CONTAINER_NAME }}-0 -f; exit 1; fi
