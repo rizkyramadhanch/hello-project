@@ -49,6 +49,9 @@ jobs:
       INTERNAL_PORT: 8888
       PUBLISHED_PORT: 8888
       PUBLISHED_PORT_BAK: 8888
+      user: ${{ secrets.SSH_USERNAME }}
+      host: ${{ secrets.SSH_IP_PUBLIC }}
+      key: ${{ secrets.SSH_PRIVATE_KEY }}
     steps:
       - name: running docker info
         uses: ironhalik/docker-over-ssh-action@v1
@@ -58,13 +61,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22 # Defaults to 22
           script: |
-            docker inspect --format='{{.Config.Image}}' ${CONTAINER_NAME} > /tmp/imagename
-            cat /tmp/imagename
-            docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${PUBLISHED_PORT_BAK}:${INTERNAL_PORT} $(cat /tmp/imagename)
-            sleep 10
-            docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT_BAK}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}; else docker rm -f ${CONTAINER_NAME}-0; exit 1; fi
-            docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} ${REPO}:latest
-            sleep 10
-            docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${HOST_PORT}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}-0; else docker rm -f docker rm ${CONTAINER_NAME} && docker run --restart always --name ${CONTAINER_NAME} -dit -p ${HOST_PORT}:${CONTAINER_PORT} $(cat /tmp/imagename) && docker rm ${CONTAINER_NAME}-0 -f; exit 1; fi
+            echo "hello world"
