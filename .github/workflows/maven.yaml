@@ -53,11 +53,12 @@ jobs:
       - name: running docker info
         uses: appleboy/ssh-action@master
         with:
-          user: ${{ secrets.SSH_USERNAME }}
+          username: ${{ secrets.SSH_USERNAME }}
           host: ${{ secrets.SSH_IP_PUBLIC }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            cat ~/.ssh/id_rsa
             echo "hello world"
             cd $HOME
             ./hello.sh
