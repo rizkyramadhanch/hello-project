@@ -59,7 +59,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo ${CONTAINER_NAME}
-            ./hello.sh
             sudo docker inspect --format='{{.Config.Image}}' ${CONTAINER_NAME} > /tmp/imagename
             cat /tmp/imagename
             sudo docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${PUBLISHED_PORT_BAK}:${INTERNAL_PORT} $(cat /tmp/imagename)
