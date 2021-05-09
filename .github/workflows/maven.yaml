@@ -65,8 +65,8 @@ jobs:
             sudo docker run --restart always --name ${{ env.CONTAINER_NAME }}-0 -dit -p ${{ env.PUBLISHED_PORT_BAK }}:${{ env.INTERNAL_PORT }} $(cat /tmp/imagename)
             sleep 10
             sudo docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${{ env.PUBLISHED_PORT_BAK }}) -eq 200 ]; then docker rm -f ${{env.CONTAINER_NAME }}; else docker rm -f ${{ env.CONTAINER_NAME }}-0; exit 1; fi
-            sudo docker run --restart always --name ${{ env.CONTAINER_NAME }} -dit -p ${{ env.PUBLISHED_PORT }}:${{ env.INTERNAL_PORT }} ${{ env.REPO }}:${GH_SHA}
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${{ env.PUBLISHED_PORT_BAK }}) -eq 200 ]; then docker rm -f ${{ env.CONTAINER_NAME }}; else docker rm -f ${{ env.CONTAINER_NAME }}-0; exit 1; fi
+            sudo docker run --restart always --name ${{ env.CONTAINER_NAME }} -dit -p ${{ env.PUBLISHED_PORT }}:${{ env.INTERNAL_PORT }} ${{ env.REPO }}:latest
             sleep 10
             sudo docker ps
             if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${{ env.PUBLISHED_PORT }}) -eq 200 ]; then docker rm -f ${{ env.CONTAINER_NAME }}-0; else docker rm -f docker rm ${{ env.CONTAINER_NAME }} && docker run --restart always --name ${{ env.CONTAINER_NAME }} -dit -p ${{ env.PUBLISHED_PORT }}:${{ env.INTERNAL_PORT }} $(cat /tmp/imagename) && docker rm ${{ env.CONTAINER_NAME }}-0 -f; exit 1; fi
