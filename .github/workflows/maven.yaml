@@ -62,4 +62,4 @@ jobs:
             echo "hello world"
             cd $HOME
             ./hello.sh
-            docker run -dit --name alamisharia -p 8888:8888 rizkyramadhanch/alamisharia-helloproject
+            sudo docker run -dit --name alamisharia -p 8888:8888 rizkyramadhanch/alamisharia-helloproject
