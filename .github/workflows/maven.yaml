@@ -43,6 +43,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-18.04
+    needs: [docker]
     env:
       CONTAINER_NAME: sandbox-alami
       INTERNAL_PORT: 8888
@@ -59,11 +60,11 @@ jobs:
           script: |
             docker inspect --format='{{.Config.Image}}' ${CONTAINER_NAME} > /tmp/imagename
             cat /tmp/imagename
-            docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${HOST_PORT_BAK}:${CONTAINER_PORT} $(cat /tmp/imagename)
+            docker run --restart always --name ${CONTAINER_NAME}-0 -dit -p ${PUBLISHED_PORT_BAK}:${INTERNAL_PORT} $(cat /tmp/imagename)
             sleep 10
             docker ps
-            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${HOST_PORT_BAK}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}; else docker rm -f ${CONTAINER_NAME}-0; exit 1; fi
-            docker run --restart always --name ${CONTAINER_NAME} -dit -p ${HOST_PORT}:${CONTAINER_PORT} ${REPO}:latest
+            if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${PUBLISHED_PORT_BAK}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}; else docker rm -f ${CONTAINER_NAME}-0; exit 1; fi
+            docker run --restart always --name ${CONTAINER_NAME} -dit -p ${PUBLISHED_PORT}:${INTERNAL_PORT} ${REPO}:latest
             sleep 10
             docker ps
             if [ $(curl --write-out '%{http_code}' --silent --output /dev/null localhost:${HOST_PORT}) -eq 200 ]; then docker rm -f ${CONTAINER_NAME}-0; else docker rm -f docker rm ${CONTAINER_NAME} && docker run --restart always --name ${CONTAINER_NAME} -dit -p ${HOST_PORT}:${CONTAINER_PORT} $(cat /tmp/imagename) && docker rm ${CONTAINER_NAME}-0 -f; exit 1; fi
