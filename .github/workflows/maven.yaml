@@ -49,17 +49,14 @@ jobs:
       INTERNAL_PORT: 8888
       PUBLISHED_PORT: 8888
       PUBLISHED_PORT_BAK: 8888
-      user: ${{ secrets.SSH_USERNAME }}
-      host: ${{ secrets.SSH_IP_PUBLIC }}
-      key: ${{ secrets.SSH_PRIVATE_KEY }}
     steps:
       - name: running docker info
-        uses: ironhalik/docker-over-ssh-action@v1
+        uses: appleboy/ssh-action@master
         with:
-          user: ${user}
-          host: ${host}
-          key: ${key}
-          port: 22 # Defaults to 22
+          user: ${{ secrets.SSH_USERNAME }}
+          host: ${{ secrets.SSH_IP_PUBLIC }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
             echo "hello world"
             cd $HOME
