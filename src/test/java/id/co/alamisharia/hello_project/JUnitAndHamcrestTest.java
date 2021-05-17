@@ -47,7 +47,7 @@ public class JUnitAndHamcrestTest {
         .compose(HttpClientResponse::body))
       .onComplete(context.asyncAssertSuccess(body -> {
         assertThat(body.toString(), is("foo"));
-        client.close()
+        client.close();
       }));
   }
 }
